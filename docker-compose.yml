@@ -1,0 +1,13 @@
+services:
+  gridguard:
+    build: .
+    ports:
+      # Bound to localhost on purpose: the dashboard has no authentication
+      # and is meant for local use only. Do not change this to "8087:8087"
+      # on a machine reachable from other hosts. See SECURITY.md.
+      - "127.0.0.1:8087:8087"
+    volumes:
+      - gridguard-data:/root/.local/share/gridguard
+
+volumes:
+  gridguard-data:

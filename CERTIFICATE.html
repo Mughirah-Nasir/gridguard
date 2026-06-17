@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>GridGuard — Certificate of Origin</title>
+<style>
+  body { font-family: Georgia, 'Times New Roman', serif; background:#f5f1e8; color:#2a2620;
+         max-width: 760px; margin: 40px auto; padding: 0 24px; }
+  .cert { background:#fffdf7; border: 3px double #8a7a5c; padding: 48px 56px; }
+  h1 { font-variant: small-caps; letter-spacing: 4px; text-align:center; font-weight: normal;
+       border-bottom: 1px solid #c9bda0; padding-bottom: 18px; }
+  .seal { text-align:center; font-size: 40px; margin: 8px 0 20px; }
+  dt { font-weight: bold; margin-top: 14px; }
+  dd { margin: 4px 0 0 0; }
+  code, pre { font-family: ui-monospace, Consolas, monospace; background:#f0ead9;
+              padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+  pre { padding: 12px 14px; overflow-x: auto; }
+  .hash { word-break: break-all; }
+  .sig { margin-top: 40px; display:flex; justify-content: space-between; align-items: flex-end; }
+  .sig .line { border-top: 1px solid #2a2620; padding-top: 6px; width: 260px; text-align:center; font-size: 14px;}
+  .small { font-size: 13px; color:#6b6253; }
+</style>
+</head>
+<body>
+<div class="cert">
+  <h1>Certificate of Origin</h1>
+  <div class="seal">⚡</div>
+
+  <dl>
+    <dt>Project</dt>
+    <dd>GridGuard v1.0.0 — a grid-aware command guard for load-shedding environments (exit code 87)</dd>
+
+    <dt>Author &amp; Director</dt>
+    <dd>Mughirah Nasir &lt;mnasir.bee25seecs@seecs.edu.pk&gt;<br/>
+        GitHub: <a href="https://github.com/Mughirah-Nasir">@Mughirah-Nasir</a></dd>
+
+    <dt>Timeline</dt>
+    <dd>Designed May 2026 (project B2 of the author's summer build plan);
+        implemented June 2026 in openly disclosed AI pair-programming sessions
+        (Claude, Anthropic) under the author's design and direction. Commit
+        timestamps are honest and same-day. See <code>PROVENANCE.md</code> and
+        <code>AUTHENTICITY.md</code> in this repository.</dd>
+
+    <dt>Source-tree fingerprint (SHA-256 over the sorted manifest of source files)</dt>
+    <dd><code class="hash">4683d4dc2a0e55c66cb9d9905a24f3b94b735a1af777585bf1fde967f010204c</code></dd>
+
+    <dt>Recompute it yourself</dt>
+    <dd><pre>find . -type f -not -path './.git/*' -not -name CERTIFICATE.html \
+  -not -path '*/node_modules/*' -not -path '*/__pycache__/*' \
+  -not -path '*/.ruff_cache/*' -not -path '*/.pytest_cache/*' \
+  | LC_ALL=C sort | xargs sha256sum | sha256sum</pre>
+    <span class="small">Run from the repository root (Linux/macOS/WSL/Git-Bash). The first field
+    of the output must equal the fingerprint above. Any edit to any source
+    file changes it.</span></dd>
+
+    <dt>Verification chain</dt>
+    <dd class="small">
+      ① This fingerprint pins the exact source tree →
+      ② GitHub push timestamp once published (server-recorded, not author-editable) →
+      ③ optional Bitcoin anchor via OpenTimestamps (<code>ots stamp PROVENANCE.md</code>).
+      This public zip ships without the <code>.git</code> folder; commit history
+      lives on GitHub after the first push.
+    </dd>
+  </dl>
+
+  <div class="sig">
+    <div class="line">Mughirah Nasir<br/><span class="small">Author</span></div>
+    <div class="line">June 2026<br/><span class="small">Author signature</span></div>
+  </div>
+</div>
+</body>
+</html>

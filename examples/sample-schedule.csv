@@ -1,0 +1,5 @@
+type,days,date,start,end,reason
+recurring,daily,,02:00,04:00,scheduled load-shedding
+recurring,daily,,14:00,16:00,scheduled load-shedding
+recurring,mon|wed|fri,,20:00,22:00,peak-hour shedding
+oneoff,,2026-06-15,09:00,13:00,grid maintenance

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GridGuard</title>
+<style>
+  :root {
+    --bg: #0a0e14;
+    --panel: #111722;
+    --panel-2: #161d2b;
+    --line: #243044;
+    --text: #c8d3e0;
+    --muted: #6b7c93;
+    --on: #34d399;
+    --off: #f87171;
+    --warn: #fbbf24;
+    --accent: #38bdf8;
+    --mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--mono); font-size: 14px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    display: flex; align-items: baseline; gap: 12px;
+    padding: 18px 24px; border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #0d131d, #0a0e14);
+  }
+  header .logo { font-weight: 700; letter-spacing: 2px; color: var(--accent); }
+  header .logo b { color: var(--text); }
+  header .zone { color: var(--muted); margin-left: auto; }
+  .wrap { padding: 24px; max-width: 1040px; margin: 0 auto; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px; padding: 18px 20px;
+  }
+  .card h2 {
+    margin: 0 0 14px; font-size: 11px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted); font-weight: 600;
+  }
+  .status-card { grid-column: 1 / -1; display: flex; align-items: center; gap: 28px; }
+  .lamp { width: 84px; height: 84px; border-radius: 50%; position: relative; flex: none; }
+  .lamp::after {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    box-shadow: 0 0 32px 6px currentColor; opacity: .55;
+  }
+  .lamp.on  { background: var(--on);  color: var(--on); }
+  .lamp.off { background: var(--off); color: var(--off); animation: blink 1.1s infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+  .status-text .big { font-size: 30px; font-weight: 700; letter-spacing: 1px; }
+  .status-text .sub { color: var(--muted); margin-top: 4px; }
+  .metric { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px dashed var(--line); }
+  .metric:last-child { border-bottom: none; }
+  .metric .k { color: var(--muted); }
+  .metric .v { font-weight: 600; }
+  .v.on { color: var(--on); } .v.off { color: var(--off); } .v.warn { color: var(--warn); }
+
+  .timeline { grid-column: 1 / -1; }
+  .track { position: relative; height: 46px; background: var(--panel-2);
+           border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .track .cut {
+    position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(
+      45deg, rgba(248,113,113,.35), rgba(248,113,113,.35) 8px,
+      rgba(248,113,113,.18) 8px, rgba(248,113,113,.18) 16px);
+    border-left: 2px solid var(--off); border-right: 2px solid var(--off);
+  }
+  .track .now { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--accent); }
+  .track .now::after { content: "now"; position: absolute; top: -16px; left: -10px;
+      font-size: 10px; color: var(--accent); }
+  .ticks { display: flex; justify-content: space-between; color: var(--muted);
+           font-size: 11px; margin-top: 6px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 11px; letter-spacing: .5px; text-transform: uppercase; }
+  td.code-ok { color: var(--on); } td.code-bad { color: var(--off); }
+  .empty { color: var(--muted); padding: 14px 6px; }
+  footer { color: var(--muted); text-align: center; padding: 20px; font-size: 12px; }
+  .pulse { display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+           background: var(--accent); margin-right: 6px; animation: blink 1.4s infinite; }
+</style>
+</head>
+<body>
+  <header>
+    <span class="logo">GRID<b>GUARD</b></span>
+    <span class="zone"><span class="pulse"></span><span id="zone">—</span></span>
+  </header>
+
+  <div class="wrap">
+    <div class="grid">
+      <section class="card status-card">
+        <div class="lamp off" id="lamp"></div>
+        <div class="status-text">
+          <div class="big" id="power">CONNECTING…</div>
+          <div class="sub" id="power-sub">contacting GridGuard daemon</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Runway</h2>
+        <div class="metric"><span class="k">until next cut</span><span class="v" id="runway">—</span></div>
+        <div class="metric"><span class="k">next cut</span><span class="v" id="next-cut">—</span></div>
+        <div class="metric"><span class="k">reason</span><span class="v" id="next-reason">—</span></div>
+      </section>
+
+      <section class="card">
+        <h2>Zone</h2>
+        <div class="metric"><span class="k">feeder</span><span class="v" id="zone2">—</span></div>
+        <div class="metric"><span class="k">local time</span><span class="v" id="clock">—</span></div>
+        <div class="metric"><span class="k">notes</span><span class="v" id="desc">—</span></div>
+      </section>
+
+      <section class="card timeline">
+        <h2>Next 24 hours</h2>
+        <div class="track" id="track"><div class="now" id="now-marker"></div></div>
+        <div class="ticks" id="ticks"></div>
+      </section>
+
+      <section class="card" style="grid-column: 1 / -1;">
+        <h2>Recent guarded runs</h2>
+        <table>
+          <thead><tr><th>when</th><th>duration</th><th>exit</th><th>command</th></tr></thead>
+          <tbody id="runs"><tr><td class="empty" colspan="4">loading…</td></tr></tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <footer>GridGuard · exit code 87 = blocked by load-shedding · auto-refresh every 5s</footer>
+
+<script>
+const WINDOW_HOURS = 24;
+function fmtDelta(sec) {
+  if (sec === null) return "unlimited";
+  sec = Math.max(0, Math.round(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  if (h) return `${h}h ${String(m).padStart(2,"0")}m`;
+  if (m) return `${m}m ${String(s).padStart(2,"0")}s`;
+  return `${s}s`;
+}
+function hhmm(iso) {
+  const d = new Date(iso);
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+async function refresh() {
+  try {
+    const [st, sc, hi] = await Promise.all([
+      fetch("/api/status").then(r => r.json()),
+      fetch("/api/schedule?hours=" + WINDOW_HOURS).then(r => r.json()),
+      fetch("/api/history?limit=12").then(r => r.json()),
+    ]);
+    renderStatus(st);
+    renderTimeline(sc, st);
+    renderRuns(hi.runs);
+  } catch (e) {
+    document.getElementById("power").textContent = "OFFLINE";
+    document.getElementById("power-sub").textContent = "cannot reach daemon";
+  }
+}
+
+function renderStatus(st) {
+  const on = st.power_on;
+  document.getElementById("zone").textContent = st.zone;
+  document.getElementById("zone2").textContent = st.zone;
+  document.getElementById("desc").textContent = st.description || "—";
+  document.getElementById("clock").textContent = hhmm(st.now);
+  const lamp = document.getElementById("lamp");
+  lamp.className = "lamp " + (on ? "on" : "off");
+  const power = document.getElementById("power");
+  power.textContent = on ? "POWER ON" : "POWER OUT";
+  power.style.color = on ? "var(--on)" : "var(--off)";
+  const runway = document.getElementById("runway");
+  if (on) {
+    runway.textContent = fmtDelta(st.runway_seconds);
+    runway.className = "v " + (st.runway_seconds !== null && st.runway_seconds < 1800 ? "warn" : "on");
+    document.getElementById("power-sub").textContent = "mains available — heavy jobs allowed";
+  } else {
+    const end = st.current_outage ? hhmm(st.current_outage.end) : "?";
+    runway.textContent = "0s — cut until " + end;
+    runway.className = "v off";
+    document.getElementById("power-sub").textContent = "load-shedding active — jobs paused";
+  }
+  document.getElementById("next-cut").textContent = st.next_outage ? hhmm(st.next_outage.start) : "none scheduled";
+  document.getElementById("next-reason").textContent = st.next_outage ? st.next_outage.reason : "—";
+}
+
+function renderTimeline(sc, st) {
+  const track = document.getElementById("track");
+  track.querySelectorAll(".cut").forEach(n => n.remove());
+  const now = new Date(st.now);
+  const start = now.getTime();
+  const span = WINDOW_HOURS * 3600 * 1000;
+  for (const w of sc.windows) {
+    const s = Math.max(new Date(w.start).getTime(), start);
+    const e = Math.min(new Date(w.end).getTime(), start + span);
+    if (e <= s) continue;
+    const left = ((s - start) / span) * 100;
+    const width = ((e - s) / span) * 100;
+    const div = document.createElement("div");
+    div.className = "cut";
+    div.style.left = left + "%";
+    div.style.width = width + "%";
+    div.title = `${hhmm(w.start)}–${hhmm(w.end)} · ${w.reason}`;
+    track.appendChild(div);
+  }
+  document.getElementById("now-marker").style.left = "0%";
+  const ticks = document.getElementById("ticks");
+  ticks.innerHTML = "";
+  for (let h = 0; h <= WINDOW_HOURS; h += 6) {
+    const t = new Date(start + h * 3600 * 1000);
+    const span2 = document.createElement("span");
+    span2.textContent = t.getHours().toString().padStart(2, "0") + ":00";
+    ticks.appendChild(span2);
+  }
+}
+
+function renderRuns(runs) {
+  const tb = document.getElementById("runs");
+  if (!runs.length) {
+    tb.innerHTML = '<tr><td class="empty" colspan="4">no guarded runs yet</td></tr>';
+    return;
+  }
+  tb.innerHTML = runs.map(r => {
+    const when = r.started_at.slice(0, 19).replace("T", " ");
+    const dur = fmtDelta(r.duration_s);
+    const cls = r.exit_code === 0 ? "code-ok" : "code-bad";
+    const cmd = (r.raw_command || "").replace(/</g, "&lt;");
+    return `<tr><td>${when}</td><td>${dur}</td><td class="${cls}">${r.exit_code}</td><td>${cmd}</td></tr>`;
+  }).join("");
+}
+
+refresh();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>
