@@ -236,3 +236,9 @@ This repository is intended to be easy to inspect and verify locally. After clon
 ## Documentation maintenance
 
 This repository is maintained as a small, reviewable public project. Setup steps, verification commands, limitations, and security notes should stay clear enough for someone to inspect the project quickly before running it.
+
+## Future improvements
+
+- Add recurring outage-window templates for common schedules.
+- Add a dry-run mode that explains whether a command would be blocked.
+- Add clearer examples for Docker builds, migrations, and long-running installs.
